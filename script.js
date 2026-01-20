@@ -128,7 +128,6 @@ class GameEngine {
 
     generateQuestion(level) {
         let question = {};
-        const qType = Math.random();
 
         switch (parseInt(level)) {
             case 1: // Counting
@@ -137,7 +136,7 @@ class GameEngine {
                 question = {
                     type: 'counting',
                     text: `${emoji} は いくつ？`,
-                    formula: `Count the ${emoji}`,
+                    formula: `Count: ?`,
                     visuals: Array(count).fill(emoji),
                     answer: count,
                     choices: this.generateChoices(count, 1, 10)
@@ -150,24 +149,23 @@ class GameEngine {
                 let n2 = Math.floor(Math.random() * 10) + 1;
                 while (n1 === n2) n2 = Math.floor(Math.random() * 10) + 1;
 
-                // 50% chance of asking for larger, 50% smaller? 
-                // Spec says "Choose the larger one" mainly, but let's stick to "Which is more?"
+                // Spec says "Choose the larger one" mainly
                 const larger = Math.max(n1, n2);
                 question = {
                     type: 'compare',
                     text: 'どっちが おおい？',
+                    formula: `? > ?`,
                     visuals: [
                         { val: n1, label: `${n1}こ`, isCorrect: n1 === larger },
                         { val: n2, label: `${n2}こ`, isCorrect: n2 === larger }
                     ],
                     answer: larger,
-                    choices: [n1, n2], // Special handling for comparison buttons
+                    choices: [n1, n2],
                     isComparison: true
                 };
                 break;
 
             case 3: // Sum to 5
-                // x + ? = 5
                 const target5 = 5;
                 const a3 = Math.floor(Math.random() * (target5 + 1)); // 0 to 5
                 const b3 = target5 - a3;
@@ -175,7 +173,7 @@ class GameEngine {
                     type: 'calc',
                     text: `${a3} と なにで 5 ？`,
                     formula: `${a3} + ? = 5`,
-                    visuals: [], // Could show incomplete blocks if needed
+                    visuals: [],
                     answer: b3,
                     choices: this.generateChoices(b3, 0, 5)
                 };
@@ -187,7 +185,7 @@ class GameEngine {
                 const b4 = target10 - a4;
                 question = {
                     type: 'calc',
-                    text: `${a4} + □ = 10`,
+                    text: `${a4} と なにで 10 ？`,
                     formula: `${a4} + ? = 10`,
                     visuals: [],
                     answer: b4,
@@ -196,8 +194,6 @@ class GameEngine {
                 break;
 
             case 5: // Addition up to 20 (no carry)
-                // Generate a (e.g., 12) + b (e.g. 3)
-                // No carry means: (a%10) + (b%10) < 10
                 let a5, b5;
                 do {
                     a5 = Math.floor(Math.random() * 20) + 1;
@@ -220,15 +216,13 @@ class GameEngine {
     generateChoices(correct, min, max, count = 4) {
         const choices = new Set([correct]);
         while (choices.size < count) {
-            // Generate wrong answer close to correct one
-            const offset = Math.floor(Math.random() * 5) - 2; // -2 to +2
+            const offset = Math.floor(Math.random() * 5) - 2;
             let wrong = correct + offset;
             if (wrong < min) wrong = min + Math.floor(Math.random() * 3);
             if (wrong > max) wrong = max - Math.floor(Math.random() * 3);
             if (wrong !== correct && wrong >= min && wrong <= max) {
                 choices.add(wrong);
             }
-            // Fallback random
             if (choices.size < count) {
                 choices.add(Math.floor(Math.random() * (max - min + 1)) + min);
             }
@@ -249,6 +243,7 @@ class App {
         this.currentScore = 0;
         this.questions = [];
         this.wrongAnswers = [];
+        this.editingUserId = null;
 
         this.initDOM();
         this.bindEvents();
@@ -268,6 +263,7 @@ class App {
             birthYearSelect: document.getElementById('birth-year'),
             currentUserName: document.getElementById('current-user-name'),
             questionText: document.getElementById('question-text'),
+            questionFormula: document.getElementById('question-formula'),
             questionVisuals: document.getElementById('question-visuals'),
             optionsArea: document.getElementById('options-area'),
             scoreDisplay: document.getElementById('score-display'),
@@ -275,13 +271,26 @@ class App {
             feedbackOverlay: document.getElementById('feedback-overlay'),
             resultTitle: document.getElementById('result-title'),
             resultScoreText: document.getElementById('result-score-text'),
-            resultMessage: document.getElementById('result-message')
+            resultMessage: document.getElementById('result-message'),
+
+            // Modal Elements
+            editModal: document.getElementById('edit-modal'),
+            editNameInput: document.getElementById('edit-name'),
+            editBirthYearSelect: document.getElementById('edit-birth-year'),
+            saveUserBtn: document.getElementById('save-user-btn'),
+            deleteUserBtn: document.getElementById('delete-user-btn'),
+            cancelEditBtn: document.getElementById('cancel-edit-btn')
         };
     }
 
     bindEvents() {
         // User Screen
         document.getElementById('start-btn').addEventListener('click', () => this.handleRegister());
+
+        // Modal Events
+        if (this.elements.saveUserBtn) this.elements.saveUserBtn.addEventListener('click', () => this.handleSaveUser());
+        if (this.elements.deleteUserBtn) this.elements.deleteUserBtn.addEventListener('click', () => this.handleDeleteUser());
+        if (this.elements.cancelEditBtn) this.elements.cancelEditBtn.addEventListener('click', () => this.closeModal());
 
         // Level Screen
         document.querySelectorAll('.level-btn').forEach(btn => {
@@ -303,22 +312,94 @@ class App {
     showScreen(screenName) {
         Object.values(this.screens).forEach(el => el.classList.remove('active'));
         this.screens[screenName].classList.add('active');
+        if (screenName === 'level') {
+            this.updateLevelBadges();
+        }
     }
 
     renderUserList() {
         const users = this.userManager.getUsers();
         this.elements.userList.innerHTML = '';
         users.forEach(user => {
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'inline-flex';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.margin = '5px';
+
             const btn = document.createElement('button');
             btn.className = 'secondary-btn';
-            btn.style.margin = '5px';
             btn.textContent = user.name;
             btn.onclick = () => {
                 this.userManager.selectUser(user.id);
                 this.updateUserInfo();
                 this.showScreen('level');
             };
-            this.elements.userList.appendChild(btn);
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-user-btn';
+            editBtn.textContent = '⚙️';
+            editBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.openEditModal(user);
+            };
+
+            wrapper.appendChild(btn);
+            wrapper.appendChild(editBtn);
+            this.elements.userList.appendChild(wrapper);
+        });
+    }
+
+    openEditModal(user) {
+        this.editingUserId = user.id;
+        this.elements.editNameInput.value = user.name;
+        this.elements.editBirthYearSelect.value = user.birthYear;
+        this.elements.editModal.style.display = 'flex';
+    }
+
+    closeModal() {
+        this.elements.editModal.style.display = 'none';
+        this.editingUserId = null;
+    }
+
+    handleSaveUser() {
+        if (!this.editingUserId) return;
+        const name = this.elements.editNameInput.value.trim();
+        const year = this.elements.editBirthYearSelect.value;
+        if (name && year) {
+            this.userManager.updateUser(this.editingUserId, name, year);
+            this.renderUserList();
+            this.closeModal();
+            // If current user was edited, update name display
+            if (this.userManager.currentUser && this.userManager.currentUser.id === this.editingUserId) {
+                this.userManager.selectUser(this.editingUserId); // reload
+                this.updateUserInfo();
+            }
+        }
+    }
+
+    handleDeleteUser() {
+        if (!this.editingUserId) return;
+        if (confirm('ほんとうに けす？')) {
+            this.userManager.deleteUser(this.editingUserId);
+            this.renderUserList();
+            this.closeModal();
+        }
+    }
+
+    updateLevelBadges() {
+        if (!this.userManager.currentUser) return;
+        const stats = this.userManager.getLevelStats(this.userManager.currentUser.id);
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            const level = btn.dataset.level;
+            const existing = btn.querySelector('.score-badge');
+            if (existing) existing.remove();
+
+            if (stats[level]) {
+                const badge = document.createElement('div');
+                badge.className = 'score-badge';
+                badge.textContent = `${stats[level].score}/10`;
+                btn.appendChild(badge);
+            }
         });
     }
 
@@ -327,11 +408,10 @@ class App {
         const age = this.elements.birthYearSelect.value;
         if (name && age) {
             this.userManager.addUser(name, age);
-            // Select the newly created user (last one)
             const users = this.userManager.getUsers();
             this.userManager.selectUser(users[users.length - 1].id);
             this.updateUserInfo();
-            this.renderUserList(); // refresh list
+            this.renderUserList();
             this.elements.userNameInput.value = '';
             this.elements.birthYearSelect.value = '';
             this.showScreen('level');
@@ -353,7 +433,6 @@ class App {
         this.wrongAnswers = [];
         this.questions = [];
 
-        // Generate 10 questions
         for (let i = 0; i < 10; i++) {
             this.questions.push(this.gameEngine.generateQuestion(this.currentLevel));
         }
@@ -365,33 +444,30 @@ class App {
     renderQuestion() {
         const q = this.questions[this.currentQuestionIndex];
 
-        // Update progress
         this.elements.scoreDisplay.textContent = `${this.currentQuestionIndex + 1} / 10`;
         this.elements.progressFill.style.width = `${((this.currentQuestionIndex) / 10) * 100}%`;
 
-        // Clear previous
         this.elements.questionText.textContent = q.text;
+        // Make sure formula element exists
+        if (this.elements.questionFormula) {
+            this.elements.questionFormula.textContent = q.formula || '';
+        }
+
         this.elements.questionVisuals.innerHTML = '';
         this.elements.optionsArea.innerHTML = '';
 
-        // Render visuals
         if (q.type === 'compare') {
-            // Special comparison rendering
-            // 2 big buttons representing the groups
             q.visuals.forEach(group => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.style.width = '200px';
                 btn.style.height = '150px';
                 btn.style.borderRadius = '20px';
-                // Show items if small number, or number if large? Spec says "Compare numbers or groups"
-                // Let's show both number and emoji count for educational value
                 btn.innerHTML = `<div>${group.val}</div><div style="font-size:1.5rem">${this.gameEngine.emojis[0].repeat(group.val)}</div>`;
                 btn.onclick = () => this.handleAnswer(group.val, q.answer);
                 this.elements.optionsArea.appendChild(btn);
             });
         } else {
-            // Standard problem
             if (q.visuals && q.visuals.length > 0) {
                 q.visuals.forEach(v => {
                     const el = document.createElement('div');
@@ -401,7 +477,6 @@ class App {
                 });
             }
 
-            // Options
             q.choices.forEach(choice => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
@@ -414,13 +489,11 @@ class App {
 
     handleAnswer(selected, correct, btnElement) {
         if (selected == correct) {
-            // Correct
             this.currentScore++;
             this.soundManager.playCorrect();
             this.showFeedback(true);
             this.nextQuestion();
         } else {
-            // Wrong
             this.soundManager.playWrong();
             if (btnElement) {
                 btnElement.classList.add('shake');
@@ -430,10 +503,6 @@ class App {
                 q: this.questions[this.currentQuestionIndex],
                 yourAns: selected
             });
-            // Don't auto advance on wrong? Or advance?
-            // "Feedback: Button shakes" -> usually implies try again.
-            // But spec says "Result screen shows mistakes", which implies we move on.
-            // Let's move on after a short delay so they see it was wrong.
             this.showFeedback(false);
             this.nextQuestion();
         }
@@ -444,10 +513,6 @@ class App {
         overlay.textContent = isCorrect ? '⭕️' : '❌';
         overlay.className = isCorrect ? 'correct' : 'wrong';
         overlay.style.opacity = '1';
-
-        if (isCorrect) {
-            // Confetti effect could go here
-        }
 
         setTimeout(() => {
             overlay.style.opacity = '0';
@@ -479,8 +544,6 @@ class App {
         else msg = 'もう少し！いっしょにがんばろう💪';
 
         this.elements.resultMessage.textContent = msg;
-
-        // Optionally list mistakes
     }
 }
 
