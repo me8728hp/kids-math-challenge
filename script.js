@@ -286,6 +286,8 @@ class App {
     bindEvents() {
         // User Screen
         document.getElementById('start-btn').addEventListener('click', () => this.handleRegister());
+        const updateBtn = document.getElementById('update-app-btn');
+        if (updateBtn) updateBtn.addEventListener('click', () => this.handleAppUpdate());
 
         // Modal Events
         if (this.elements.saveUserBtn) this.elements.saveUserBtn.addEventListener('click', () => this.handleSaveUser());
@@ -433,8 +435,18 @@ class App {
         this.wrongAnswers = [];
         this.questions = [];
 
+        // Generate 10 questions, avoiding consecutive duplicates
+        let lastQ = null;
         for (let i = 0; i < 10; i++) {
-            this.questions.push(this.gameEngine.generateQuestion(this.currentLevel));
+            let q;
+            let attempts = 0;
+            do {
+                q = this.gameEngine.generateQuestion(this.currentLevel);
+                attempts++;
+            } while (lastQ && q.text === lastQ.text && attempts < 5);
+
+            this.questions.push(q);
+            lastQ = q;
         }
 
         this.showScreen('game');
@@ -544,6 +556,26 @@ class App {
         else msg = 'もう少し！いっしょにがんばろう💪';
 
         this.elements.resultMessage.textContent = msg;
+    }
+
+    handleAppUpdate() {
+        if (!confirm('アプリをこうしん しますか？')) return;
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+                // Clear caches
+                caches.keys().then(names => {
+                    for (let name of names) caches.delete(name);
+                }).then(() => {
+                    window.location.reload(true);
+                });
+            });
+        } else {
+            window.location.reload(true);
+        }
     }
 }
 
