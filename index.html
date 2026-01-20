@@ -5,10 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-    <title>キッズ算数チャレンジ</title>
+    <title>キッズ算数チャレンジ </title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF9F1C">
+
+    <!-- iOS support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="キッズさんすう">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 
@@ -32,6 +39,10 @@
                         <option value="6">6さい</option>
                     </select>
                     <button id="start-btn" class="primary-btn">はじめる！</button>
+                    <div style="margin-top: 20px;">
+                        <button id="update-app-btn" onclick="javascript:void(0)"
+                            style="font-size: 1rem; padding: 5px 15px; background: #999; color: white; border: none; border-radius: 10px;">アプリをこうしん</button>
+                    </div>
                 </div>
             </div>
         </section>
