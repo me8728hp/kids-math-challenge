@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <title>キッズ算数チャレンジ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF9F1C">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+
+<body>
+    <div id="app">
+        <!-- ユーザー登録・選択画面 -->
+        <section id="user-screen" class="screen active">
+            <div class="content-wrapper">
+                <h1>キッズ算数チャレンジ</h1>
+                <div id="user-list">
+                    <!-- ユーザーボタンがここに動的に追加される -->
+                </div>
+                <div class="user-form">
+                    <h2>あたらしくはじめる</h2>
+                    <input type="text" id="user-name" placeholder="おなまえ" maxlength="10">
+                    <select id="birth-year">
+                        <option value="">なんさい？</option>
+                        <option value="3">3さい</option>
+                        <option value="4">4さい</option>
+                        <option value="5">5さい</option>
+                        <option value="6">6さい</option>
+                    </select>
+                    <button id="start-btn" class="primary-btn">はじめる！</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- レベル選択画面 -->
+        <section id="level-screen" class="screen">
+            <header>
+                <div class="user-info">
+                    <span id="current-user-name"></span>
+                </div>
+                <button id="logout-btn" class="secondary-btn">やめる</button>
+            </header>
+            <div class="content-wrapper">
+                <h2>レベルをえらんでね</h2>
+                <div class="level-grid">
+                    <button class="level-btn" data-level="1">
+                        <span class="level-num">1</span>
+                        <span class="level-desc">かずをかぞえよう</span>
+                    </button>
+                    <button class="level-btn" data-level="2">
+                        <span class="level-num">2</span>
+                        <span class="level-desc">どちらがおおい？</span>
+                    </button>
+                    <button class="level-btn" data-level="3">
+                        <span class="level-num">3</span>
+                        <span class="level-desc">あわせて 5</span>
+                    </button>
+                    <button class="level-btn" data-level="4">
+                        <span class="level-num">4</span>
+                        <span class="level-desc">あわせて 10</span>
+                    </button>
+                    <button class="level-btn" data-level="5">
+                        <span class="level-num">5</span>
+                        <span class="level-desc">チャレンジけいさん</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ゲーム画面 -->
+        <section id="game-screen" class="screen">
+            <header>
+                <button id="quit-game-btn" class="secondary-btn">もどる</button>
+                <div class="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+                <div id="score-display">0 / 0</div>
+            </header>
+            <div class="game-area">
+                <div id="question-area">
+                    <!-- 問題がここに表示される -->
+                    <div id="question-text"></div>
+                    <div id="question-formula" style="font-size: 3rem; color: #555; margin: 10px 0;"></div>
+                    <div id="question-visuals"></div>
+                </div>
+                <div id="options-area">
+                    <!-- 選択肢ボタンがここに表示される -->
+                </div>
+            </div>
+            <!-- 正解・不正解エフェクト用オーバーレイ -->
+            <div id="feedback-overlay"></div>
+        </section>
+
+        <!-- ユーザー編集モーダル -->
+        <div id="edit-modal" class="modal">
+            <div class="modal-content">
+                <h2>ユーザー設定</h2>
+                <input type="text" id="edit-name" placeholder="おなまえ" maxlength="10">
+                <select id="edit-birth-year">
+                    <option value="3">3さい</option>
+                    <option value="4">4さい</option>
+                    <option value="5">5さい</option>
+                    <option value="6">6さい</option>
+                </select>
+                <div class="modal-actions">
+                    <button id="save-user-btn" class="primary-btn">ほぞん</button>
+                    <button id="delete-user-btn" class="accent-btn" style="background-color: #E71D36;">さくじょ</button>
+                    <button id="cancel-edit-btn" class="secondary-btn">キャンセル</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- リザルト画面 -->
+        <section id="result-screen" class="screen">
+            <div class="content-wrapper">
+                <h2 id="result-title">クリア！</h2>
+                <div class="score-card">
+                    <p id="result-score-text">10もんちゅう 8もんせいかい！</p>
+                    <p id="result-message">すごい！てんさいだね！</p>
+                </div>
+                <div class="action-buttons">
+                    <button id="retry-btn" class="primary-btn">もういちどやる</button>
+                    <button id="home-btn" class="secondary-btn">さいしょにもどる</button>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+    </script>
+</body>
+
+</html>
