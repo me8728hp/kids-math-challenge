@@ -853,3 +853,101 @@ button {
     /* Red dot */
     border-radius: 50%;
 }
+
+.large-formula {
+    font-size: 5rem;
+}
+
+/* === Tablet / Responsive Adjustments (Max Width 1024px - iPad Mini) === */
+@media screen and (max-width: 1024px) {
+
+    /* Reduce base sizes */
+    html {
+        font-size: 14px;
+        /* Slightly smaller base */
+    }
+
+    .main-title {
+        font-size: 3rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    /* Game Area Layout */
+    .game-area {
+        gap: 1rem;
+        padding: 0.5rem;
+    }
+
+    /* On Portrait Tablets, stack the layout if needed, or keep 2-col but smaller */
+    @media (orientation: portrait) {
+        .game-area {
+            grid-template-columns: 1fr;
+            /* Stack vertically */
+            grid-template-rows: auto 1fr;
+            /* Question top, Options bottom */
+        }
+
+        #question-area {
+            min-height: 30vh;
+        }
+
+        #options-area {
+            grid-template-columns: repeat(2, 1fr);
+            align-content: start;
+        }
+    }
+
+    /* Visual Elements Scaling */
+    #question-visuals,
+    .large-formula {
+        font-size: 3.5rem !important;
+        /* Override inline/large settings */
+    }
+
+    .question-formula {
+        font-size: 2.5rem;
+    }
+
+    #question-text {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Buttons */
+    .option-btn {
+        font-size: 2rem;
+        min-height: 80px;
+        padding: 0.5rem;
+    }
+
+    .tap-object {
+        width: 100px;
+        height: 100px;
+        font-size: 3.5rem;
+    }
+
+    .visual-icons {
+        font-size: 2.5rem;
+    }
+
+    .visual-count {
+        font-size: 2rem;
+    }
+
+    .compare-card {
+        min-width: 120px;
+    }
+
+    .complement-cell {
+        width: 50px;
+        height: 50px;
+    }
+
+    /* User List */
+    #user-name-input {
+        width: 80%;
+    }
+}

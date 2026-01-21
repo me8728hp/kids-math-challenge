@@ -330,7 +330,7 @@ const LevelConfig = {
                 const current = LevelConfig.randomInt(1, 4);
                 const ans = 5 - current;
                 return {
-                    text: `<div class="question-formula" style="font-size: 5rem;">${current} ＋ □ ＝ 5</div>`,
+                    text: `<div class="question-formula large-formula">${current} ＋ □ ＝ 5</div>`,
                     type: "formula_missing",
                     value: current, // 表示用補助データ
                     answer: ans,
