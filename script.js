@@ -177,7 +177,6 @@ const LevelConfig = {
         {
             id: 1,
             title: "タッチして数えよう",
-            title: "タッチして数えよう",
             label: "タッチしてね",
             desc: "え を タッチして かぞえてね",
             gen: () => {
@@ -681,8 +680,6 @@ class UIController {
                     const isFilled = i < qData.value ? 'filled' : '';
                     html5 += `<div class="complement-cell ${isFilled}"></div>`;
                 }
-                html5 += '</div>';
-                container.innerHTML = html5;
                 html5 += '</div>';
                 container.innerHTML = html5;
                 break;
