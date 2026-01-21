@@ -1,20 +1,24 @@
 {
-    "name": "わくわくさんすうチャレンジ！",
-    "short_name": "さんすう",
+    "name": "キッズ算数アドベンチャー",
+    "short_name": "算数冒険",
     "start_url": "./index.html",
-    "display": "standalone",
-    "background_color": "#FFD700",
-    "theme_color": "#FFD700",
+    "display": "fullscreen",
+    "orientation": "landscape",
+    "background_color": "#FFEB3B",
+    "theme_color": "#00BCD4",
+    "description": "4〜6歳児向けの楽しい算数トレーニングアプリ",
     "icons": [
         {
-            "src": "icon.png",
+            "src": "assets/icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
-            "src": "icon.png",
+            "src": "assets/icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ]
 }

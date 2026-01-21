@@ -3,104 +3,170 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>わくわくさんすうチャレンジ！</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <title>キッズ算数アドベンチャー</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#FFD700">
+    <meta name="theme-color" content="#00BCD4">
+
+    <!-- iOS PWA Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦁</text></svg>">
 </head>
 
 <body>
-    <div id="app">
-        <!-- Title Screen -->
-        <section id="title-screen" class="screen active">
-            <h1 class="logo-title">
-                <span class="bounce-char">わ</span>
-                <span class="bounce-char">く</span>
-                <span class="bounce-char">わ</span>
-                <span class="bounce-char">く</span>
-                <br>
-                さんすうチャレンジ！
-            </h1>
-            <button id="start-btn" class="ui-btn primary-btn large-btn">あそぶ</button>
-            <div class="footer-credit">Developed for Kids Math Learning</div>
-        </section>
 
-        <!-- Level Map Screen -->
-        <section id="level-map-screen" class="screen">
-            <div class="screen-header">
-                <button id="back-to-title-btn" class="ui-btn icon-btn">🏠</button>
-                <h2>ぼうけんマップ</h2>
-            </div>
-            <div id="level-road-container">
-                <!-- Levels will be generated here by JS -->
-            </div>
-        </section>
+    <!-- アプリ全体のコンテナ -->
+    <div id="app-container">
 
-        <!-- Game Screen -->
-        <section id="game-screen" class="screen">
-            <div class="hud">
-                <button id="quit-game-btn" class="ui-btn sm-btn warning">やめる</button>
-                <div class="level-info">Level <span id="current-level-display">1</span></div>
-                <div class="stars-display">⭐️ x <span id="current-stars">0</span></div>
+        <!-- === 0. 向き警告画面 (スマホ縦持ち防止) === -->
+        <div id="orientation-warning">
+            <div class="message-box">
+                <h1>よこむきにしてね！</h1>
+                <div class="rotate-icon">📱 ➡️ 📟</div>
             </div>
+        </div>
 
-            <div id="game-area">
-                <!-- Dynamic content area for questions -->
-                <div id="question-container">
-                    <div id="visual-area"></div>
-                    <div id="formula-area"></div>
+        <!-- === 1. ユーザー登録画面 === -->
+        <section id="registration-view" class="view hidden">
+            <div class="content-wrapper centered">
+                <h1 class="main-title">キッズ<br>さんすう<br>アドベンチャー</h1>
+                <h2 class="sub-title">おなまえをおしえてね</h2>
+
+                <!-- Returning User Area -->
+                <div id="returning-user-area" class="hidden">
+                    <div id="user-list-container">
+                        <!-- Users will be rendered here -->
+                    </div>
+                    <button id="add-new-user-btn" class="main-action-btn" style="margin-top: 20px;">
+                        ➕ あたらしい おともだち
+                    </button>
                 </div>
 
-                <div id="options-container">
-                    <!-- Choice buttons will be injected here -->
+                <!-- Registration Area -->
+                <div id="registration-area">
+                    <button id="reg-back-btn" class="secondary-btn hidden" style="margin-bottom: 10px;">↩️ もどる</button>
+                    <div class="input-group">
+                        <label>おなまえ (ひらがな)</label>
+                        <input type="text" id="user-name-input" placeholder="例: たろう" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label>なんさい？</label>
+                        <div class="age-selector">
+                            <button class="age-btn" data-age="3">3さい</button>
+                            <button class="age-btn" data-age="4">4さい</button>
+                            <button class="age-btn" data-age="5">5さい</button>
+                            <button class="age-btn" data-age="6">6さい</button>
+                        </div>
+                    </div>
+                    <button id="start-btn" class="main-action-btn disabled">はじめる！</button>
                 </div>
 
-                <div id="touch-area-overlay"></div>
+                <div style="margin-top: 40px; text-align: center;">
+                    <button id="update-app-btn" class="secondary-btn"
+                        style="font-size: 0.8rem; padding: 5px 15px; opacity: 0.7;">
+                        🔄 アプリのこうしん
+                    </button>
+                </div>
             </div>
+        </section>
 
-            <!-- Help Button (Lv7+) -->
-            <button id="help-btn" class="ui-btn help-btn hidden">🖐️ ヒント</button>
+        <!-- === 2. マップ画面 (レベル選択) === -->
+        <section id="map-view" class="view hidden">
+            <header class="map-header">
+                <div class="user-info">
+                    <span id="display-user-name">ゲスト</span> くん/ちゃん
+                </div>
+                <button id="title-back-btn" class="secondary-btn"
+                    style="font-size: 1rem; padding: 0.5rem 1rem;">タイトルへもどる</button>
+            </header>
+            <div class="map-container-scroll">
+                <div class="map-path">
+                    <!-- レベルボタンはJSで動的に生成されます -->
+                    <!-- 例: <button class="level-node unlocked" data-level="1">1</button> -->
+                    <svg class="path-line" width="100%" height="100%"></svg>
+                </div>
+            </div>
+        </section>
 
-            <!-- Feedback Overlay -->
-            <div id="feedback-overlay" class="hidden">
+        <!-- === 3. ゲームプレイ画面 === -->
+        <section id="game-view" class="view hidden">
+            <header class="game-header">
+                <button id="back-to-map-btn" class="icon-btn">↩️ もどる</button>
+                <div class="progress-bar-container">
+                    <div id="game-progress-bar" class="progress-fill" style="width: 0%;"></div>
+                </div>
+                <div id="game-progress-text"
+                    style="font-size: 1.2rem; font-weight: bold; color: var(--text-color); margin-left: 10px;">1/10
+                </div>
+            </header>
+
+            <main class="game-area">
+                <div id="question-area" class="question-container">
+                    <div id="question-text">もんだい</div>
+                    <div id="question-visuals">
+                        <!-- 画像やドットなど -->
+                    </div>
+                </div>
+
+                <div id="options-area" class="options-container">
+                    <!-- 選択肢ボタンがここに表示されます -->
+                </div>
+
+                <button id="hint-btn" class="hint-btn hidden">💡 ヒント</button>
+            </main>
+
+            <!-- フィードバックオーバーレイ (正解/不正解) -->
+            <div id="feedback-overlay" class="overlay hidden">
                 <div class="feedback-content">
-                    <span id="feedback-icon">⭕️</span>
-                    <span id="feedback-text">すごい！</span>
+                    <div id="feedback-icon">🌟</div>
+                    <div id="feedback-text">すごい！</div>
                 </div>
             </div>
         </section>
 
-        <!-- Result Screen -->
-        <section id="result-screen" class="screen">
-            <div class="result-card">
-                <h2 id="result-title">クリア！</h2>
-                <div id="result-stars" class="stars-anim">
-                    <!-- Stars will be injected here -->
+        <!-- === 4. リザルト画面 === -->
+        <section id="result-view" class="view hidden">
+            <div class="content-wrapper centered">
+                <h1>おつかれさま！</h1>
+
+                <div class="score-display">
+                    <div class="stars-container" id="result-stars">
+                        <!-- 星がアニメーションで入る -->
+                    </div>
+                    <p id="result-message">よくがんばったね！</p>
                 </div>
-                <div class="result-actions">
-                    <button id="retry-btn" class="ui-btn secondary-btn">もういちど</button>
-                    <button id="next-level-btn" class="ui-btn primary-btn">つぎへ</button>
-                    <button id="back-to-map-btn" class="ui-btn">マップへ</button>
+
+                <div class="action-buttons">
+                    <button id="retry-btn" class="secondary-btn">もういちど</button>
+                    <button id="next-level-btn" class="main-action-btn">つぎへすすむ</button>
+                    <button id="return-map-btn" class="secondary-btn">マップにもどる</button>
                 </div>
             </div>
         </section>
+
     </div>
+
+    <!-- 音声ファイル (プレースホルダー読み込み) -->
+    <audio id="bgm-main" loop src="assets/bgm_placeholder.mp3"></audio>
 
     <script src="script.js"></script>
     <script>
-        // PWA Service Worker Registration
+        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('SW registered', reg))
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered!', reg))
                     .catch(err => console.log('SW failed', err));
             });
         }
     </script>
+
+
 </body>
 
 </html>
