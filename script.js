@@ -165,7 +165,7 @@ const LevelConfig = {
         const options = new Set([answer]);
         while (options.size < count) {
             let dummy = answer + LevelConfig.randomInt(-range, range);
-            if (dummy >= 0 && dummy !== answer && dummy <= 20) { // 負の数や大きすぎる数は除外
+            if (dummy >= 1 && dummy !== answer && dummy <= 20) { // 負の数や0、大きすぎる数は除外
                 options.add(dummy);
             }
         }
@@ -206,16 +206,30 @@ const LevelConfig = {
             title: "同じ数はどっち？",
             label: "おなじ かずは？",
             desc: "みほんと おなじ かずは どっち？",
-            gen: () => {
-                const ans = LevelConfig.randomInt(1, 5);
-                // 正解の選択肢（値）とダミー
+            gen: function () {
+                let ans = LevelConfig.randomInt(1, 5);
+                // 前回と同じ数字が出ないようにする
+                if (this.lastAns !== undefined) {
+                    while (ans === this.lastAns) {
+                        ans = LevelConfig.randomInt(1, 5);
+                    }
+                }
+                this.lastAns = ans;
+
+                const emojis = ['🍎', '🐶', '🚗', '🐸', '⚽️', '🐱', '🚙', '⭐️'];
+                const shuffled = emojis.sort(() => 0.5 - Math.random());
+                const mainEmoji = shuffled[0]; // For question
+                const optEmoji = shuffled[1];  // For options
+
                 return {
                     text: "したと おなじ かずは？",
                     type: "match_visual_group",
                     value: ans, // 見本の数
                     answer: ans, // 正解の数（内部的）
-                    options: LevelConfig.generateOptions(ans, 3, 2), // ※表示時に絵に変換する
+                    options: LevelConfig.generateOptions(ans, 3, 2),
                     visualOption: true, // 選択肢を数字じゃなくて絵にするフラグ
+                    emoji: mainEmoji,
+                    optionEmoji: optEmoji,
                     hint: null
                 };
             }
@@ -526,6 +540,7 @@ class UIController {
         this._renderVisuals(qData, qVisuals, onAnswer);
 
         // 選択肢描画
+        // 選択肢描画
         optArea.innerHTML = '';
 
         // compare_visualの場合は選択肢ボタンを表示しない (ビジュアル自体をタップする)
@@ -535,7 +550,13 @@ class UIController {
                 btn.className = 'option-btn';
 
                 if (qData.visualOption) {
-                    btn.innerHTML = this._getVisualString(optVal); // 絵で選択肢を表示する場合
+                    // Level 2 Special: Option Visual + Number
+                    const useEmoji = qData.optionEmoji || '🐸';
+                    // Show emoji string AND number
+                    btn.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; line-height:1.1;">
+                                        <div>${this._getVisualString(optVal, useEmoji)}</div>
+                                        <div style="font-size:1.5rem; color:#666; font-weight:bold;">${optVal}</div>
+                                     </div>`;
                 } else {
                     btn.textContent = optVal;
                 }
@@ -566,8 +587,15 @@ class UIController {
         const emoji = qData.emoji || this.emojis[Math.floor(Math.random() * this.emojis.length)];
 
         switch (qData.type) {
-            case 'count_objects':
             case 'match_visual_group':
+                // Level 2: Visuals + Number below
+                container.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center;">
+                                        <div style="font-size:5rem; line-height:1.2;">${emoji.repeat(qData.value)}</div>
+                                        <div style="font-size:3rem; color:#333; font-weight:bold;">${qData.value}</div>
+                                       </div>`;
+                break;
+
+            case 'count_objects':
                 container.textContent = emoji.repeat(qData.value);
                 break;
             case 'tap_to_count':
@@ -704,9 +732,9 @@ class UIController {
         }
     }
 
-    _getVisualString(count) {
+    _getVisualString(count, emoji = '🐸') {
         // 絵文字をcount個返すヘルパー
-        return '🐸'.repeat(count);
+        return emoji.repeat(count);
     }
 
     _showHint(hintType) {
