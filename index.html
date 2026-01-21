@@ -3,148 +3,101 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-    <title>キッズ算数チャレンジ </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>わくわくさんすうチャレンジ！</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#FF9F1C">
-
-    <!-- iOS support -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="キッズさんすう">
-    <link rel="apple-touch-icon" href="icon-192.png">
-
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta name="theme-color" content="#FFD700">
 </head>
 
 <body>
     <div id="app">
-        <!-- ユーザー登録・選択画面 -->
-        <section id="user-screen" class="screen active">
-            <div class="content-wrapper">
-                <h1>キッズ算数チャレンジ</h1>
-                <div id="user-list">
-                    <!-- ユーザーボタンがここに動的に追加される -->
-                </div>
-                <div class="user-form">
-                    <h2>あたらしくはじめる</h2>
-                    <input type="text" id="user-name" placeholder="おなまえ" maxlength="10">
-                    <select id="birth-year">
-                        <option value="">なんさい？</option>
-                        <option value="3">3さい</option>
-                        <option value="4">4さい</option>
-                        <option value="5">5さい</option>
-                        <option value="6">6さい</option>
-                    </select>
-                    <button id="start-btn" class="primary-btn">はじめる！</button>
-                    <div style="margin-top: 20px;">
-                        <button id="update-app-btn" onclick="javascript:void(0)"
-                            style="font-size: 1rem; padding: 5px 15px; background: #999; color: white; border: none; border-radius: 10px;">アプリをこうしん</button>
-                    </div>
-                </div>
+        <!-- Title Screen -->
+        <section id="title-screen" class="screen active">
+            <h1 class="logo-title">
+                <span class="bounce-char">わ</span>
+                <span class="bounce-char">く</span>
+                <span class="bounce-char">わ</span>
+                <span class="bounce-char">く</span>
+                <br>
+                さんすうチャレンジ！
+            </h1>
+            <button id="start-btn" class="ui-btn primary-btn large-btn">あそぶ</button>
+            <div class="footer-credit">Developed for Kids Math Learning</div>
+        </section>
+
+        <!-- Level Map Screen -->
+        <section id="level-map-screen" class="screen">
+            <div class="screen-header">
+                <button id="back-to-title-btn" class="ui-btn icon-btn">🏠</button>
+                <h2>ぼうけんマップ</h2>
+            </div>
+            <div id="level-road-container">
+                <!-- Levels will be generated here by JS -->
             </div>
         </section>
 
-        <!-- レベル選択画面 -->
-        <section id="level-screen" class="screen">
-            <header>
-                <div class="user-info">
-                    <span id="current-user-name"></span>
-                </div>
-                <button id="logout-btn" class="secondary-btn">やめる</button>
-            </header>
-            <div class="content-wrapper">
-                <h2>レベルをえらんでね</h2>
-                <div class="level-grid">
-                    <button class="level-btn" data-level="1">
-                        <span class="level-num">1</span>
-                        <span class="level-desc">かずをかぞえよう</span>
-                    </button>
-                    <button class="level-btn" data-level="2">
-                        <span class="level-num">2</span>
-                        <span class="level-desc">どちらがおおい？</span>
-                    </button>
-                    <button class="level-btn" data-level="3">
-                        <span class="level-num">3</span>
-                        <span class="level-desc">あわせて 5</span>
-                    </button>
-                    <button class="level-btn" data-level="4">
-                        <span class="level-num">4</span>
-                        <span class="level-desc">あわせて 10</span>
-                    </button>
-                    <button class="level-btn" data-level="5">
-                        <span class="level-num">5</span>
-                        <span class="level-desc">チャレンジけいさん</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- ゲーム画面 -->
+        <!-- Game Screen -->
         <section id="game-screen" class="screen">
-            <header>
-                <button id="quit-game-btn" class="secondary-btn">もどる</button>
-                <div class="progress-bar">
-                    <div id="progress-fill"></div>
+            <div class="hud">
+                <button id="quit-game-btn" class="ui-btn sm-btn warning">やめる</button>
+                <div class="level-info">Level <span id="current-level-display">1</span></div>
+                <div class="stars-display">⭐️ x <span id="current-stars">0</span></div>
+            </div>
+
+            <div id="game-area">
+                <!-- Dynamic content area for questions -->
+                <div id="question-container">
+                    <div id="visual-area"></div>
+                    <div id="formula-area"></div>
                 </div>
-                <div id="score-display">0 / 0</div>
-            </header>
-            <div class="game-area">
-                <div id="question-area">
-                    <!-- 問題がここに表示される -->
-                    <div id="question-text"></div>
-                    <div id="question-formula" style="font-size: 3rem; color: #555; margin: 10px 0;"></div>
-                    <div id="question-visuals"></div>
+
+                <div id="options-container">
+                    <!-- Choice buttons will be injected here -->
                 </div>
-                <div id="options-area">
-                    <!-- 選択肢ボタンがここに表示される -->
+
+                <div id="touch-area-overlay"></div>
+            </div>
+
+            <!-- Help Button (Lv7+) -->
+            <button id="help-btn" class="ui-btn help-btn hidden">🖐️ ヒント</button>
+
+            <!-- Feedback Overlay -->
+            <div id="feedback-overlay" class="hidden">
+                <div class="feedback-content">
+                    <span id="feedback-icon">⭕️</span>
+                    <span id="feedback-text">すごい！</span>
                 </div>
             </div>
-            <!-- 正解・不正解エフェクト用オーバーレイ -->
-            <div id="feedback-overlay"></div>
         </section>
 
-        <!-- ユーザー編集モーダル -->
-        <div id="edit-modal" class="modal">
-            <div class="modal-content">
-                <h2>ユーザー設定</h2>
-                <input type="text" id="edit-name" placeholder="おなまえ" maxlength="10">
-                <select id="edit-birth-year">
-                    <option value="3">3さい</option>
-                    <option value="4">4さい</option>
-                    <option value="5">5さい</option>
-                    <option value="6">6さい</option>
-                </select>
-                <div class="modal-actions">
-                    <button id="save-user-btn" class="primary-btn">ほぞん</button>
-                    <button id="delete-user-btn" class="accent-btn" style="background-color: #E71D36;">さくじょ</button>
-                    <button id="cancel-edit-btn" class="secondary-btn">キャンセル</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- リザルト画面 -->
+        <!-- Result Screen -->
         <section id="result-screen" class="screen">
-            <div class="content-wrapper">
+            <div class="result-card">
                 <h2 id="result-title">クリア！</h2>
-                <div class="score-card">
-                    <p id="result-score-text">10もんちゅう 8もんせいかい！</p>
-                    <p id="result-message">すごい！てんさいだね！</p>
+                <div id="result-stars" class="stars-anim">
+                    <!-- Stars will be injected here -->
                 </div>
-                <div class="action-buttons">
-                    <button id="retry-btn" class="primary-btn">もういちどやる</button>
-                    <button id="home-btn" class="secondary-btn">さいしょにもどる</button>
+                <div class="result-actions">
+                    <button id="retry-btn" class="ui-btn secondary-btn">もういちど</button>
+                    <button id="next-level-btn" class="ui-btn primary-btn">つぎへ</button>
+                    <button id="back-to-map-btn" class="ui-btn">マップへ</button>
                 </div>
             </div>
         </section>
     </div>
+
     <script src="script.js"></script>
     <script>
+        // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('SW registered', reg))
+                    .catch(err => console.log('SW failed', err));
             });
         }
     </script>
