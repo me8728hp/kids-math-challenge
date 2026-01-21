@@ -79,6 +79,8 @@ h1 {
         6px 6px 0 #FFEB3B;
     animation: title-bounce 2s infinite ease-in-out;
     margin-bottom: 20px;
+    white-space: nowrap;
+    /* Force single line */
 }
 
 @keyframes title-bounce {
