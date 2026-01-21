@@ -530,7 +530,7 @@ class UIController {
         optArea.innerHTML = '';
 
         // compare_visualの場合は選択肢ボタンを表示しない (ビジュアル自体をタップする)
-        if (qData.type !== 'compare_visual') {
+        if (qData.options && qData.type !== 'compare_visual') {
             qData.options.forEach(optVal => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
